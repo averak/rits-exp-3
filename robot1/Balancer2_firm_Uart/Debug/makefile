@@ -29,7 +29,7 @@ all: Balancer2_firm_Uart.axf
 Balancer2_firm_Uart.axf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU Linker'
-	arm-none-eabi-gcc -nostdlib -L"//MAC/Home/立命館/授業/2021/春学期/実世界情報実験3/rits-exp-3/robot1/Balancer2_firm_Uart/lib" -Xlinker --gc-sections -Xlinker -Map=Balancer2_firm_Uart.map -mcpu=cortex-m3 -mthumb -T "Balancer2_Debug.ld" -o "Balancer2_firm_Uart.axf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -nostdlib -L"C:/Users/abelab/Documents/LPCXpresso_8.2.2_650/rits-exp-3/robot1/Balancer2_firm_Uart/lib" -Xlinker --gc-sections -Xlinker -Map=Balancer2_firm_Uart.map -mcpu=cortex-m3 -mthumb -T "Balancer2_Debug.ld" -o "Balancer2_firm_Uart.axf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build

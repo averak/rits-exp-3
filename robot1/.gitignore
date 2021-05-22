@@ -15,6 +15,7 @@
 *.sct
 *.bak
 *.dep
+*.bin
 
 #MDK-ARM
 *.__i
