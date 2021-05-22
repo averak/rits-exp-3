@@ -60,49 +60,30 @@ unsigned char calibrarion(){
  * 倒立制御
  */
 void Control(){
-	volatile double wheel_L_angle,wheel_R_angle;
-	volatile double wheel_L_angular_spd,wheel_R_angular_spd;
 	volatile double outL = 0.0,outR = 0.0;
 
-	//本体角度フィードバック
-	outL += memmap.values.GAIN_BODY * memmap.values.GAIN_BODY_ANGLE * memmap.values.BODY_ANGLE;
-	outR += memmap.values.GAIN_BODY * memmap.values.GAIN_BODY_ANGLE * memmap.values.BODY_ANGLE;
+	// MATLABで最適制御のゲインを計算し代入する
+	double K[4] = {0.0, 0.0, 0.0, 0.0};
+	K[0] = 1.41421356;
+	K[1] = 87.17265902;
+	K[2] = 0.79157802;
+	K[3] = 14.41672492;
 
-	//本体角速度フィードバック
-	outL += memmap.values.GAIN_BODY * memmap.values.GAIN_BODY_ANGULAR_SPD * memmap.values.BODY_ANGULAR_SPD;
-	outR += memmap.values.GAIN_BODY * memmap.values.GAIN_BODY_ANGULAR_SPD * memmap.values.BODY_ANGULAR_SPD;
+	// 状態量
+	double x[4];
+	x[0] = -(memmap.values.WHEEL_ANGLE_L + memmap.values.WHEEL_ANGLE_R)/2.0;
+	x[1] = memmap.values.BODY_ANGLE;
+	x[2] = -(memmap.values.WHEEL_ANGULAR_SPD_L + memmap.values.WHEEL_ANGULAR_SPD_R)/2.0;
+	x[3] = memmap.values.BODY_ANGULAR_SPD;
 
-	//ホイール目標回転角速度→目標回転角度
-	Tspd_L_i += (memmap.values.T_SPD_L/MAIN_CYCLE);
-	Tspd_R_i += (memmap.values.T_SPD_R/MAIN_CYCLE);
-
-	//ホイール角度、角速度算出
-	wheel_L_angle = memmap.values.WHEEL_ANGLE_L - Tspd_L_i;
-	wheel_R_angle = memmap.values.WHEEL_ANGLE_R - Tspd_R_i;
-	wheel_L_angular_spd = memmap.values.WHEEL_ANGULAR_SPD_L - (memmap.values.T_SPD_L/MAIN_CYCLE);
-	wheel_R_angular_spd = memmap.values.WHEEL_ANGULAR_SPD_R - (memmap.values.T_SPD_R/MAIN_CYCLE);
-
-	//ホイール角度フィードバック
-	outL += memmap.values.GAIN_WHEEL * memmap.values.GAIN_WHEEL_ANGLE * wheel_L_angle;
-	outR += memmap.values.GAIN_WHEEL * memmap.values.GAIN_WHEEL_ANGLE * wheel_R_angle;
-
-	//ホイール角速度フィードバック
-	outL += memmap.values.GAIN_WHEEL * memmap.values.GAIN_WHEEL_ANGULAR_SPD * wheel_L_angular_spd;
-	outR += memmap.values.GAIN_WHEEL * memmap.values.GAIN_WHEEL_ANGULAR_SPD * wheel_R_angular_spd;
-
-	//左右ホイール間の角度差算出
-	double correlation = wheel_L_angle - wheel_R_angle;
-
-	//左右ホイール間の角度差フィードバック
-	outL -= memmap.values.GAIN_WHEEL_CORRELATION * memmap.values.GAIN_WHEEL_CORRELATION_ANGLE * correlation;
-	outR += memmap.values.GAIN_WHEEL_CORRELATION * memmap.values.GAIN_WHEEL_CORRELATION_ANGLE * correlation;
-
-	//左右ホイール間の角速度差算出
-	correlation = wheel_L_angular_spd - wheel_R_angular_spd;
-
-	//左右ホイール間の角速度差フィードバック
-	outL -= memmap.values.GAIN_WHEEL_CORRELATION * memmap.values.GAIN_WHEEL_CORRELATION_ANGULAR_SPD * correlation;
-	outR += memmap.values.GAIN_WHEEL_CORRELATION * memmap.values.GAIN_WHEEL_CORRELATION_ANGULAR_SPD * correlation;
+	// 最適制御による状態フィードバック制御
+	double u = 0.0;
+	int i = 0;
+	for(i=0; i<4; i++){
+		u += -K[i]*x[i];
+	}
+	outL += u;
+	outR += u;
 
 	//最大指令値規制
 	if(outL > 32767.0){
@@ -119,8 +100,8 @@ void Control(){
 	}
 
 	//電流指令値設定
-	memmap.values.T_CURRENT_L = (short)outL;
-	memmap.values.T_CURRENT_R = (short)outR;
+	memmap.values.T_CURRENT_L = (short)outL*1000;
+	memmap.values.T_CURRENT_R = (short)outR*1000;
 }
 
 //VS-C3操縦の最大速度
