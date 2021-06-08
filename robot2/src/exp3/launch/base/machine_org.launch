@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch>
+<arg name="multi_robot_name" default=""/>
+<arg name="set_lidar_frame_id" default="base_scan"/>
+<arg name="address" default="10.17.3.91"/>
+<arg name="env_name" default="env.bash"/>
+<arg name="user_name" default="pi"/>
+<arg name="password" default="turtlebot"/>
+
+<!-- setting for machine -->
+<machine name="tb3" address="$(arg address)" env-loader="~/$(arg env_name)" user="$(arg user_name)" password="$(arg password)" />
+
+<!-- packages for turtlebot3 -->
+<node machine="tb3" pkg="rosserial_python" type="serial_node.py" name="turtlebot3_core" output="screen">
+    <param name="port" value="/dev/ttyACM0"/>
+    <param name="baud" value="115200"/>
+    <param name="tf_prefix" value="$(arg multi_robot_name)"/>
+</node>
+
+<node machine="tb3" pkg="hls_lfcd_lds_driver" type="hlds_laser_publisher" name="turtlebot3_lds" output="screen">
+    <param name="port" value="/dev/ttyUSB0"/>
+    <param name="frame_id" value="$(arg set_lidar_frame_id)"/>
+</node>
+
+<node machine="tb3" pkg="turtlebot3_bringup" type="turtlebot3_diagnostics" name="turtlebot3_diagnostics" output="screen"/>
+
+</launch>
+

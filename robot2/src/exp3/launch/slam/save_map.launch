@@ -1,0 +1,4 @@
+<launch>
+    <arg name="map_name" default="newmap"/>
+    <node name="map_saver" pkg="map_server" type="map_saver" args="-f $(find exp3)/map/$(arg map_name)"/>
+</launch>

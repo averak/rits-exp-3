@@ -1,0 +1,8 @@
+<launch>
+    <arg name="rviz_conf" value="$(find turtlebot3_description)/rviz/model.rviz"/>
+
+    <include file="$(find exp3)/launch/base/remote.launch">
+    </include>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rviz_conf)"/>
+</launch>
