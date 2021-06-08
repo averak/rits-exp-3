@@ -9,7 +9,7 @@ def callback(data):
 
 def talker():
     pub = rospy.Publisher('chatter', String, queue_size=10)
-    sub = rospy.Subscriber('chatter', String, callback)
+    _ = rospy.Subscriber('chatter', String, callback)
     rospy.init_node('talker', anonymous=True)
     rate = rospy.Rate(10)  # 10hz
     while not rospy.is_shutdown():
